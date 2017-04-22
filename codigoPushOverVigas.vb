@@ -1,5 +1,3 @@
-Option Base 1
-Sub MatrizRigidez()
 Dim numVigas As Integer
 Dim i, j, barra, gdl As Integer
 Dim L, EI
@@ -27,27 +25,29 @@ For i = 1 To numVigas
     EI(i) = ActiveCell.Offset(i, 2)
     If EI(i) = "" Then EI(i) = 1
     L(i) = ActiveCell.Offset(i, 1)
-    Select Case ActiveCell.Offset(i, 6)
-    Case ""
-        apoyo(i, 1) = 0
-        pocisionVigas(i, 1) = contador
-        pocisionVigas(i, 2) = contador + 1
-        contador = contador + 2
-    Case "Empotrado"
-        apoyo(i, 1) = 1
-        pocisionVigas(i, 1) = 0
-        pocisionVigas(i, 2) = 0
-
-    Case "Articulado"
-        apoyo(i, 1) = 2
-        pocisionVigas(i, 1) = 0
-        pocisionVigas(i, 2) = contador
-        contador = contador + 1
-
-    End Select
+    If i = 1 Then
     
+        Select Case ActiveCell.Offset(i, 6)
+        Case ""
+            apoyo(i, 1) = 0
+            pocisionVigas(i, 1) = contador
+            pocisionVigas(i, 2) = contador + 1
+            contador = contador + 2
+        Case "Empotrado"
+            apoyo(i, 1) = 1
+            pocisionVigas(i, 1) = 0
+            pocisionVigas(i, 2) = 0
     
-Select Case "A" 'ActiveCell.Offset(i + 1, 6)
+        Case "Articulado"
+            apoyo(i, 1) = 2
+            pocisionVigas(i, 1) = 0
+            pocisionVigas(i, 2) = contador
+            contador = contador + 1
+    
+        End Select
+    End If
+    
+Select Case ActiveCell.Offset(i + 1, 6)
     Case ""
         apoyo(i, 1) = 0
         pocisionVigas(i, 3) = contador
@@ -65,10 +65,14 @@ Select Case "A" 'ActiveCell.Offset(i + 1, 6)
         contador = contador + 1
 
     End Select
+    If i < numVigas Then
+        pocisionVigas(i + 1, 1) = pocisionVigas(i, 3)
+        pocisionVigas(i + 1, 2) = pocisionVigas(i, 4)
+    End If
 
 Next
 
-
+    
 For i = 1 To numVigas
       
  
@@ -99,10 +103,10 @@ Next
 ReDim matrizGlobal(gdl, gdl)
 
 For barra = 1 To numVigas
-    For i = 0 To 3
-        For j = 0 To 3
-            If pocisionVigas(barra)(j) <> 0 And pocisionVigas(barra)(i) <> 0 Then
-                matrizGlobal(pocisionVigas(barra)(i), pocisionVigas(barra)(j)) = matrizGlobal(pocisionVigas(barra)(i), pocisionVigas(barra)(j)) + rigidezVigas(barra, i + 1, j + 1)
+    For i = 1 To 4
+        For j = 1 To 4
+            If pocisionVigas(barra, j) <> 0 And pocisionVigas(barra, i) <> 0 Then
+                matrizGlobal(pocisionVigas(barra, i), pocisionVigas(barra, j)) = matrizGlobal(pocisionVigas(barra, i), pocisionVigas(barra, j)) + rigidezVigas(barra, i, j)
             End If
         Next
         
@@ -110,14 +114,5 @@ For barra = 1 To numVigas
 
 Next
 
-Sheets("Rigidez").Activate
-[a1].Select
-Cells.Delete
-For i = 1 To gdl
-    For j = 1 To gdl
-        If matrizGlobal(i, j) = "" Then matrizGlobal(i, j) = 0
-        ActiveCell.Offset(i, j) = matrizGlobal(i, j)
-    Next
-Next
-End Sub
 
+End Sub
