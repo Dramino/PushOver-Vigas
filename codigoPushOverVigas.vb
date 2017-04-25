@@ -9,6 +9,8 @@ Dim matrizGlobal
 Dim apoyo
 Dim contador As Integer
 Dim mFuerzas, celdas(2)
+dim Fn
+dim deformaciones
 Sheets("Datos").Activate
 'cuenta el número de nodos existente
 [Nodo].Select
@@ -116,6 +118,9 @@ celdas(1) = 8
 celdas(2) = 3
 
 mFuerzas = fuerzas(celdas, nodos, numGDL)
+Set Fn = Application.WorksheetFunction
+'Deformaciones
+deformaciones=Fn.Mmult(Fn.Minverse(matrizGlobal),mFuerzas)
 End Sub
 
 Function gradosLibertad(valorCeldas, valorNodos)
