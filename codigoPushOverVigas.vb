@@ -1,16 +1,17 @@
 Option Base 1
 Sub MatrizRigidez()
 Dim numVigas As Integer
-Dim i, j, barra, numGDL, nodos As Integer
+Dim i, j, k, barra, numGDL, nodos As Integer
 Dim gdl
 Dim L, EI
-Dim rigidez, pocisionVigas
+Dim rigidez, pocisionVigas, fuerzaVigas
 Dim matrizGlobal
 Dim apoyo
 Dim contador As Integer
 Dim mFuerzas, celdas(2)
-dim Fn
-dim deformaciones
+Dim Fn
+Dim defLocal, rigLocal, fuerzaLocal
+Dim CEROS
 Sheets("Datos").Activate
 'cuenta el número de nodos existente
 [Nodo].Select
@@ -120,9 +121,35 @@ celdas(2) = 3
 mFuerzas = fuerzas(celdas, nodos, numGDL)
 Set Fn = Application.WorksheetFunction
 'Deformaciones
-deformaciones=Fn.Mmult(Fn.Minverse(matrizGlobal),mFuerzas)
+deformaciones = Fn.MMult(Fn.MInverse(matrizGlobal), mFuerzas)
+'fuerzas en las barras
+ReDim defLocal(4, 1), rigLocal(4, 4)
+ReDim CEROS(4, 1)
+CEROS(1, 1) = 0
+CEROS(2, 1) = 0
+CEROS(3, 1) = 0
+CEROS(4, 1) = 0
+For i = 1 To numVigas
+    defLocal = CEROS
+    For j = 1 To 4
+        If pocisionVigas(i, j) <> 0 Then defLocal(j, 1) = deformaciones(pocisionVigas(i, j), 1)
+    Next
+    For j = 1 To 4
+        For k = 1 To 4
+            rigLocal(j, k) = rigidezVigas(i, j, k)
+        Next
+    Next
+    fuerzaLocal = fuerzaBarras(defLocal, rigLocal)
+Next
 End Sub
-
+Function fuerzaBarras(mDef, mRigidez)
+    Dim Fn
+    Dim deformaciones, rigidez
+    Set Fn = Application.WorksheetFunction
+    deformaciones = mDef
+    rigidez = mRigidez
+    fuerzaBarras = Fn.MMult(rigidez, deformaciones)
+End Function
 Function gradosLibertad(valorCeldas, valorNodos)
     Dim nodos, i, gdl As Integer
     Dim X, Y As Integer
@@ -191,4 +218,5 @@ Function fuerzas(valorCeldas, valorNodos, valorGDL)
     Next
     fuerzas = resultado
 End Function
+
 
